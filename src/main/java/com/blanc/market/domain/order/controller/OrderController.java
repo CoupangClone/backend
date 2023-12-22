@@ -1,6 +1,7 @@
 package com.blanc.market.domain.order.controller;
 
 
+import com.blanc.market.domain.order.dto.OrderProductResponse;
 import com.blanc.market.domain.order.dto.OrderRequest;
 import com.blanc.market.domain.order.dto.OrderResponse;
 import com.blanc.market.domain.order.service.OrderService;
@@ -29,6 +30,15 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(orderService.order(dto));
     }
+
+    @Operation(summary = "주문 정보 조회", description = "주문에 담긴 상품id 리스트를 반환합니다.")
+    @GetMapping("api/orders/{id}")
+    public ResponseEntity<List<OrderProductResponse>> getOrder(@PathVariable Long id){
+        return ResponseEntity.ok(orderService.getProductForOrder(id));
+    }
+
+
+
 
     //주문 상태 취소로 변경
     @Operation(summary = "주문 취소", description = "주문 취소 메서드입니다. 주문 상태를 cancle로 변경합니다.")
