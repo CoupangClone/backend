@@ -1,5 +1,7 @@
 package com.blanc.market.domain.order.service;
 
+import com.blanc.market.domain.cart.repository.CartRepository;
+import com.blanc.market.domain.cart.service.CartService;
 import com.blanc.market.domain.order.dto.OrderProductRequest;
 import com.blanc.market.domain.order.dto.OrderProductResponse;
 import com.blanc.market.domain.order.dto.OrderRequest;
@@ -40,12 +42,16 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final OrderProductMapper orderProductMapper;
 
+    private final CartService cartService;
+
+
     //주문
     @Transactional
     public OrderResponse order(OrderRequest dto){
 
         //주문한 사용자 엔티티 조회
         User user = userRepository.findUserById(dto.getUserId()).orElseThrow(NoSuchElementException::new);
+        Long userId = user.getId();
 
         double totalPrice = 0;
 
@@ -75,6 +81,9 @@ public class OrderService {
 
         //주문 저장
         orderRepository.save(order);
+
+        //장바구니 비우기
+        cartService.removeCartByUserId(userId);
 
         return orderMapper.toDto(order);
 
