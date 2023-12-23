@@ -39,4 +39,9 @@ public class CartService {
     public void removeItemFromCart(Long cartId) {
         cartRepository.deleteById(cartId);
     }
+
+    @Transactional
+    public void removeCartByUserId(Long userId){
+        cartRepository.deleteByUserId(userId);
+    }
 }

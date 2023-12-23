@@ -40,4 +40,13 @@ public class CartController {
         cartService.removeItemFromCart(id);
         return ResponseEntity.noContent().build();
     }
+
+
+    //userid로 장바구니 삭제
+    @DeleteMapping("delete/{userId}")
+    public ResponseEntity<Void> removeCart(@PathVariable Long userId){
+        cartService.removeCartByUserId(userId);
+        return ResponseEntity.noContent().build();
+    }
+
 }
