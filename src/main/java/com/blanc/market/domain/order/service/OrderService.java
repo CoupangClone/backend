@@ -1,12 +1,16 @@
 package com.blanc.market.domain.order.service;
 
+import com.blanc.market.domain.cart.repository.CartRepository;
+import com.blanc.market.domain.cart.service.CartService;
 import com.blanc.market.domain.order.dto.OrderProductRequest;
+import com.blanc.market.domain.order.dto.OrderProductResponse;
 import com.blanc.market.domain.order.dto.OrderRequest;
 import com.blanc.market.domain.order.dto.OrderResponse;
 import com.blanc.market.domain.order.entity.Order;
 import com.blanc.market.domain.order.entity.OrderProduct;
 import com.blanc.market.domain.order.entity.OrderStatus;
 import com.blanc.market.domain.order.mapper.OrderMapper;
+import com.blanc.market.domain.order.mapper.OrderProductMapper;
 import com.blanc.market.domain.order.repository.OrderProductRepository;
 import com.blanc.market.domain.order.repository.OrderRepository;
 import com.blanc.market.domain.product.entity.Product;
@@ -15,6 +19,7 @@ import com.blanc.market.domain.product.service.ProductService;
 import com.blanc.market.domain.user.entity.User;
 import com.blanc.market.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +32,7 @@ import java.util.Set;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -34,6 +40,10 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final OrderProductRepository orderProductRepository;
     private final OrderMapper orderMapper;
+    private final OrderProductMapper orderProductMapper;
+
+    private final CartService cartService;
+
 
     //주문
     @Transactional
@@ -41,6 +51,7 @@ public class OrderService {
 
         //주문한 사용자 엔티티 조회
         User user = userRepository.findUserById(dto.getUserId()).orElseThrow(NoSuchElementException::new);
+        Long userId = user.getId();
 
         double totalPrice = 0;
 
@@ -71,6 +82,9 @@ public class OrderService {
         //주문 저장
         orderRepository.save(order);
 
+        //장바구니 비우기
+        cartService.removeCartByUserId(userId);
+
         return orderMapper.toDto(order);
 
     }
@@ -79,6 +93,14 @@ public class OrderService {
     @Transactional
     public void cancleOrders(Long id){
         getEntity(id).cancelOrder();
+    }
+
+
+    public List<OrderProductResponse> getProductForOrder(Long OrderId){
+        Order order = orderRepository.findById(OrderId).orElseThrow();
+        List<OrderProduct> orderProducts = orderProductRepository.findAllByOrder(order);
+        log.info("test {}",orderProducts);
+        return orderProducts.stream().map(orderProductMapper::toDto).toList();
     }
 
 
